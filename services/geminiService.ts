@@ -1,10 +1,22 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+// 兼容性修复：在没有构建工具的环境下 process 可能未定义
+const getApiKey = () => {
+  try {
+    return (typeof process !== 'undefined' && process.env) ? process.env.API_KEY : '';
+  } catch {
+    return '';
+  }
+};
+
+const ai = new GoogleGenAI({ apiKey: getApiKey() || '' });
 
 export const generateIcebreaker = async (studentName: string) => {
   try {
+    const apiKey = getApiKey();
+    if (!apiKey) throw new Error("API Key not found");
+
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: `你是一个幽默风趣的课堂老师。现在你随机点到了学生“${studentName}”。请为他生成一个有趣的破冰挑战或是一个令人惊喜的小问题。要求：中文，字数20字以内，轻松愉快，适合课堂氛围。直接返回挑战内容即可。`,

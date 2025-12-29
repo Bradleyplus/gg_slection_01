@@ -14,8 +14,8 @@ import {
   ChevronRight,
   FileSpreadsheet
 } from 'lucide-react';
-import { Student, HistoryItem } from './types';
-import { generateIcebreaker } from './services/geminiService';
+import { Student, HistoryItem } from './types.ts';
+import { generateIcebreaker } from './services/geminiService.ts';
 import confetti from 'https://cdn.skypack.dev/canvas-confetti';
 import * as XLSX from 'xlsx';
 
