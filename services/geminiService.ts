@@ -3,7 +3,7 @@ import { GoogleGenAI } from "@google/genai";
 
 const getApiKey = () => {
   try {
-    // 浏览器安全检查：优先检查 window.process 或直接检查 process 是否存在
+    // 兼容多种环境的 API Key 获取方式
     const env = (typeof window !== 'undefined' && (window as any).process?.env) 
                 || (typeof process !== 'undefined' ? process.env : null);
     
@@ -14,12 +14,12 @@ const getApiKey = () => {
 };
 
 const apiKey = getApiKey();
-// 使用占位符初始化以防止 SDK 内部错误，实际逻辑会通过 apiKey 长度判断是否启用 AI
-const ai = new GoogleGenAI({ apiKey: apiKey || 'NO_KEY_PROVIDED' });
+// 即使没有 Key 也不在这里崩溃，让 generateIcebreaker 处理逻辑
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export const generateIcebreaker = async (studentName: string) => {
-  // 如果没有有效 Key，直接进入本地趣味库模式
-  if (!apiKey || apiKey === 'NO_KEY_PROVIDED') {
+  // 离线模式或无 Key 模式：直接返回本地挑战
+  if (!ai || !apiKey) {
     return getFallbackChallenge();
   }
 
@@ -34,7 +34,7 @@ export const generateIcebreaker = async (studentName: string) => {
     });
     return response.text?.trim() || getFallbackChallenge();
   } catch (error) {
-    console.warn("Gemini Service is unavailable (Network or Config issue). Switching to local deck.");
+    console.warn("AI Service unavailable, switching to offline fallback.");
     return getFallbackChallenge();
   }
 };
@@ -48,7 +48,9 @@ function getFallbackChallenge() {
     "如果你现在可以瞬间移动，你想去哪里？",
     "描述一下你手机里最后一张照片拍了什么？",
     "说出一件本周让你感到很有成就感的小事。",
-    "如果你要给全班推荐一首歌，你会选哪首？"
+    "如果你要给全班推荐一首歌，你会选哪首？",
+    "模仿一个你最喜欢的动画角色！",
+    "如果可以穿越到过去，你最想去哪个朝代？"
   ];
   return fallbacks[Math.floor(Math.random() * fallbacks.length)];
 }

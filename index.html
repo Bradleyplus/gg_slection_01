@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CyberCall - 赛博点名系统</title>
   
-  <!-- UI 库 -->
+  <!-- UI 库与字体（使用 CDN 绝对路径，确保稳定） -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
   
@@ -43,13 +43,13 @@
       text-shadow: 0 0 10px rgba(0, 255, 255, 0.8), 0 0 20px rgba(0, 255, 255, 0.3);
     }
 
-    /* 隐藏滚动条但保留功能 */
+    /* 自定义滚动条 */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: #0a0a0a; }
     ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
     ::-webkit-scrollbar-thumb:hover { background: #00ffff; }
 
-    /* 初始加载动画 */
+    /* 初始加载遮罩 */
     #loading-screen {
       position: fixed;
       inset: 0;
@@ -88,16 +88,16 @@
   <div id="root"></div>
   <div class="scanline"></div>
 
-  <!-- 使用 Babel Standalone 实时编译 -->
+  <!-- 使用 Babel Standalone 实时编译 TSX -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   
-  <!-- 确保入口文件以相对路径加载 -->
+  <!-- 关键：入口点使用相对路径 -->
   <script type="text/babel" data-presets="typescript,react" data-type="module">
     import "./index.tsx";
   </script>
 
   <script>
-    // 资源加载完后隐藏 loading
+    // 隐藏加载动画
     window.addEventListener('load', () => {
       setTimeout(() => {
         const loader = document.getElementById('loading-screen');
@@ -105,16 +105,14 @@
           loader.style.opacity = '0';
           setTimeout(() => loader.remove(), 500);
         }
-      }, 1000);
+      }, 800);
     });
 
-    // 针对 GitHub Pages 的监控，如果 5 秒后还没渲染出 root 内容，尝试给出提示
-    setTimeout(() => {
-      const root = document.getElementById('root');
-      if (root && root.innerHTML === "" && document.getElementById('loading-screen')) {
-        console.warn("Detection: App took too long to load. Checking dependencies...");
-      }
-    }, 5000);
+    // 错误处理：如果脚本加载失败，给出更友好的反馈
+    window.onerror = function(msg, url, lineNo, columnNo, error) {
+      console.error('Error: ' + msg + '\nURL: ' + url + '\nLine: ' + lineNo);
+      return false;
+    };
   </script>
 </body>
 </html>
