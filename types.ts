@@ -10,11 +10,3 @@ export interface HistoryItem {
   student: Student;
   challenge?: string;
 }
-
-export interface AppState {
-  students: Student[];
-  history: HistoryItem[];
-  isSpinning: boolean;
-  selectedStudent: Student | null;
-  aiChallenge: string | null;
-}

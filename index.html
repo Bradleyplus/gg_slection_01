@@ -4,17 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CyberCall - 赛博随机点名</title>
+  <title>CyberCall - 赛博点名系统</title>
   
-  <!-- Tailwind CSS -->
+  <!-- UI 库 -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Babel 运行时编译器：这是在静态网页直接运行 TSX 的核心 -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  
-  <!-- ES Module Shims：确保 Import Map 在旧版本浏览器也能完美运行 -->
-  <script async src="https://unpkg.com/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
-
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
   
   <style>
@@ -29,6 +22,7 @@
     }
     .font-orbitron { font-family: 'Orbitron', 'Noto Sans SC', sans-serif; }
     
+    /* 赛博扫描线效果 */
     @keyframes scanline {
       0% { transform: translateY(-100%); }
       100% { transform: translateY(100%); }
@@ -39,20 +33,34 @@
       left: 0;
       width: 100%;
       height: 2px;
-      background: rgba(0, 255, 255, 0.1);
+      background: rgba(0, 255, 255, 0.15);
       z-index: 50;
       pointer-events: none;
-      animation: scanline 6s linear infinite;
+      animation: scanline 8s linear infinite;
     }
 
     .neon-text {
-      text-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
+      text-shadow: 0 0 10px rgba(0, 255, 255, 0.8), 0 0 20px rgba(0, 255, 255, 0.3);
     }
 
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #111; }
+    /* 隐藏滚动条但保留功能 */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #0a0a0a; }
     ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
     ::-webkit-scrollbar-thumb:hover { background: #00ffff; }
+
+    /* 初始加载动画 */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      background: #050505;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: opacity 0.5s ease;
+    }
   </style>
 
   <script type="importmap">
@@ -64,6 +72,7 @@
     "lucide-react": "https://esm.sh/lucide-react@0.460.0",
     "@google/genai": "https://esm.sh/@google/genai@1.3.0",
     "xlsx": "https://esm.sh/xlsx@0.18.5",
+    "canvas-confetti": "https://esm.sh/canvas-confetti@1.9.3",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "react/": "https://esm.sh/react@^19.2.3/"
   }
@@ -71,11 +80,27 @@
 </script>
 </head>
 <body>
+  <div id="loading-screen">
+    <div class="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+    <p class="mt-4 font-orbitron text-cyan-500 tracking-widest animate-pulse">SYSTEM INITIALIZING...</p>
+  </div>
+
   <div id="root"></div>
   <div class="scanline"></div>
 
-  <!-- 使用 Babel 编译 TSX -->
-  <!-- data-presets 告诉 Babel 这是一个 React 和 TypeScript 项目 -->
-  <script type="text/babel" data-type="module" data-presets="typescript,react" src="./index.tsx"></script>
+  <!-- 注意：为了解决 GitHub Pages 无法直接解析 .tsx 的问题，我们需要引入 Babel 实时转换 -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel" data-presets="typescript,react" data-type="module" src="./index.tsx"></script>
+
+  <script>
+    // 资源加载完后隐藏 loading
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const loader = document.getElementById('loading-screen');
+        if(loader) loader.style.opacity = '0';
+        setTimeout(() => loader && loader.remove(), 500);
+      }, 1000);
+    });
+  </script>
 </body>
 </html>
