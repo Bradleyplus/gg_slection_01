@@ -9,7 +9,6 @@ import { generateIcebreaker } from './services/geminiService.ts';
 import confetti from 'canvas-confetti';
 import * as XLSX from 'xlsx';
 
-// 赛博风格按钮
 const NeonButton: React.FC<{
   onClick: () => void;
   children: React.ReactNode;
@@ -33,7 +32,6 @@ const NeonButton: React.FC<{
   );
 };
 
-// 磨砂玻璃卡片
 const GlassCard: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
   <div className={`bg-gray-900/60 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl ${className}`}>
     {children}
@@ -51,7 +49,6 @@ export default function App() {
   const [activeName, setActiveName] = useState<string>('???');
   const spinnerInterval = useRef<number | null>(null);
 
-  // 初始化加载
   useEffect(() => {
     const saved = localStorage.getItem('cybercall_students');
     const savedHist = localStorage.getItem('cybercall_history');
@@ -59,13 +56,11 @@ export default function App() {
     if (savedHist) setHistory(JSON.parse(savedHist));
   }, []);
 
-  // 实时保存
   useEffect(() => {
     localStorage.setItem('cybercall_students', JSON.stringify(students));
     localStorage.setItem('cybercall_history', JSON.stringify(history));
   }, [students, history]);
 
-  // 文件解析逻辑
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -88,7 +83,6 @@ export default function App() {
     e.target.value = '';
   };
 
-  // 核心抽奖逻辑
   const startSpin = useCallback(() => {
     if (students.length === 0 || isSpinning) return;
     setIsSpinning(true);
@@ -104,7 +98,6 @@ export default function App() {
       setActiveName(students[randomIndex].name);
       
       if (++count < maxIterations) {
-        // 模拟减速效果
         if (count > maxIterations - 10) speed += 50;
         else if (count > maxIterations - 20) speed += 20;
         spinnerInterval.current = window.setTimeout(spin, speed);
@@ -121,7 +114,6 @@ export default function App() {
     setSelectedStudent(winner);
     setActiveName(winner.name);
     
-    // 庆祝特效
     confetti({
       particleCount: 150,
       spread: 80,
@@ -129,11 +121,9 @@ export default function App() {
       colors: ['#00ffff', '#f000ff', '#ffffff']
     });
 
-    // AI 生成挑战
     const challenge = await generateIcebreaker(winner.name);
     setAiChallenge(challenge);
     
-    // 更新历史
     setHistory(prev => [{
       timestamp: Date.now(),
       student: winner,
@@ -143,7 +133,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen p-4 md:p-10 max-w-7xl mx-auto flex flex-col gap-8 relative z-10">
-      {/* 顶部导航 */}
       <header className="flex flex-col lg:flex-row justify-between items-center gap-6">
         <div className="flex items-center gap-4 group">
           <div className="p-4 bg-cyan-500 rounded-2xl shadow-[0_0_30px_rgba(0,255,255,0.4)] transition-transform group-hover:rotate-12">
@@ -176,13 +165,12 @@ export default function App() {
         </nav>
       </header>
 
-      {/* 主视图 */}
       <main className="flex-grow flex flex-col">
         {view === 'main' && (
-          <div className="flex-grow flex flex-col items-center justify-center py-8 animate-in zoom-in duration-500">
-            <div className={`relative w-full max-w-3xl aspect-[16/9] rounded-[40px] border-4 flex flex-col items-center justify-center bg-black/60 backdrop-blur-2xl transition-all duration-700 ${isSpinning ? 'border-fuchsia-500 shadow-[0_0_100px_rgba(240,0,255,0.2)]' : 'border-cyan-500/20 shadow-[0_0_60px_rgba(0,255,255,0.05)]'}`}>
+          <div className="flex-grow flex flex-col items-center justify-center py-4 animate-in zoom-in duration-500">
+            {/* 结果显示区域 - 设为 flex-1 撑开高度 */}
+            <div className={`result-display relative flex-1 w-full max-w-3xl rounded-[40px] border-4 flex flex-col items-center justify-center bg-black/60 backdrop-blur-2xl transition-all duration-700 ${isSpinning ? 'border-fuchsia-500 shadow-[0_0_100px_rgba(240,0,255,0.2)]' : 'border-cyan-500/20 shadow-[0_0_60px_rgba(0,255,255,0.05)]'}`}>
               
-              {/* 背景装饰 */}
               <div className="absolute inset-0 opacity-10 pointer-events-none overflow-hidden rounded-[40px]">
                 <div className="absolute inset-0 grid grid-cols-12 gap-1 px-4 opacity-20">
                    {[...Array(48)].map((_, i) => <div key={i} className="h-full border-r border-cyan-500"></div>)}
@@ -198,7 +186,7 @@ export default function App() {
               </h2>
 
               {aiChallenge && (
-                <div className="mt-12 mx-6 p-5 bg-cyan-500/5 border border-cyan-500/20 rounded-2xl animate-in slide-in-from-bottom-6 duration-700">
+                <div className="mt-8 mx-6 p-5 bg-cyan-500/5 border border-cyan-500/20 rounded-2xl animate-in slide-in-from-bottom-6 duration-700">
                   <p className="text-cyan-400 italic text-lg text-center flex items-center justify-center gap-3">
                     <Sparkles className="shrink-0 animate-pulse" size={24}/> 
                     <span className="font-medium tracking-wide">“{aiChallenge}”</span>
@@ -207,7 +195,8 @@ export default function App() {
               )}
             </div>
 
-            <div className="mt-14 flex flex-col items-center gap-6">
+            {/* 按钮组 - 减小 mt 间距 */}
+            <div className="mt-6 flex flex-col items-center gap-6 mb-4">
               {selectedStudent ? (
                 <NeonButton onClick={() => {setSelectedStudent(null); setActiveName('???'); setAiChallenge(null);}} variant="secondary" className="px-14 py-5 text-lg rounded-2xl group">
                   <RotateCcw size={22} className="group-hover:rotate-180 transition-transform duration-500"/>
@@ -327,7 +316,6 @@ export default function App() {
         )}
       </main>
 
-      {/* 底部信息 */}
       <footer className="mt-auto pt-6 border-t border-white/5 flex justify-between items-center text-[10px] text-gray-600 font-mono uppercase tracking-widest">
         <div className="flex gap-4">
           <span>S-ID: {Math.random().toString(36).substr(2, 9).toUpperCase()}</span>
