@@ -1,0 +1,7 @@
+{
+  "name": "CyberCall - 赛博点名系统",
+  "description": "一个高能、赛博朋克风格的课堂随机点名系统。支持 CSV 上传、AI 生成破冰话题、持久化存储，专为教师设计。",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
