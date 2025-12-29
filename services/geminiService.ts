@@ -1,12 +1,9 @@
-
 import { GoogleGenAI } from "@google/genai";
 
 const getApiKey = () => {
   try {
-    // 兼容多种环境的 API Key 获取方式
-    const env = (typeof window !== 'undefined' && (window as any).process?.env) 
-                || (typeof process !== 'undefined' ? process.env : null);
-    
+    // 优先从 window.process 获取（我们在 index.html 中注入的）
+    const env = (window as any).process?.env || (typeof process !== 'undefined' ? process.env : null);
     return env?.API_KEY || '';
   } catch (e) {
     return '';
@@ -14,11 +11,11 @@ const getApiKey = () => {
 };
 
 const apiKey = getApiKey();
-// 即使没有 Key 也不在这里崩溃，让 generateIcebreaker 处理逻辑
+// 只有在 Key 存在时才初始化 SDK
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export const generateIcebreaker = async (studentName: string) => {
-  // 离线模式或无 Key 模式：直接返回本地挑战
+  // 如果 AI 不可用，直接返回本地预设题库，确保 100% 不黑屏
   if (!ai || !apiKey) {
     return getFallbackChallenge();
   }
@@ -34,7 +31,7 @@ export const generateIcebreaker = async (studentName: string) => {
     });
     return response.text?.trim() || getFallbackChallenge();
   } catch (error) {
-    console.warn("AI Service unavailable, switching to offline fallback.");
+    console.warn("AI Service unavailable, using fallback.");
     return getFallbackChallenge();
   }
 };
